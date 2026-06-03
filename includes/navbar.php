@@ -151,7 +151,7 @@ if (session_status() == PHP_SESSION_NONE) {
                 <a href="signUpLogin/login.html" class="block w-full bg-gradient-to-r from-accent-green to-emerald-400 hover:from-emerald-400 hover:to-accent-green text-white font-medium rounded-full px-6 py-3 text-center transition-all">
                     Sign In
                 </a>
-                <a href="signUpLogin/register.html" class="block w-full bg-dark-100 hover:bg-dark-200 text-white font-medium rounded-full px-6 py-3 text-center transition-all">
+                <a href="signUpLogin/signup.html" class="block w-full bg-dark-100 hover:bg-dark-200 text-white font-medium rounded-full px-6 py-3 text-center transition-all">
                     Create Account
                 </a>
             </div>

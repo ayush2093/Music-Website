@@ -1,28 +1,47 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "music";
+// Database connection using env variables with fallback
+$servername = getenv('DB_HOST') ?: 'localhost';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+$dbname = getenv('DB_NAME') ?: 'music';
+$port = getenv('DB_PORT') ?: '3306';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password);
+// Try connecting to specific database first, if not possible (e.g. database doesn't exist yet on local XAMPP), connect without db name
+$conn = @new mysqli($servername, $username, $password, $dbname, $port);
 
-// Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Create database if it doesn't exist
-$sql = "CREATE DATABASE IF NOT EXISTS $dbname";
-if ($conn->query($sql) === TRUE) {
-    echo "Database created or already exists<br>";
+    // Fallback: connect without db name (useful for local setup)
+    $conn = new mysqli($servername, $username, $password, null, $port);
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    
+    // Create database if it doesn't exist
+    $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
+    if ($conn->query($sql) === TRUE) {
+        echo "Database created or already exists<br>";
+    } else {
+        echo "Error creating database: " . $conn->error . "<br>";
+    }
+    $conn->select_db($dbname);
 } else {
-    echo "Error creating database: " . $conn->error . "<br>";
+    echo "Connected directly to database '$dbname'<br>";
 }
 
-// Select the database
-$conn->select_db($dbname);
+// Create users table
+$sql = "CREATE TABLE IF NOT EXISTS users (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
+
+if ($conn->query($sql) === TRUE) {
+    echo "Table 'users' created or already exists<br>";
+} else {
+    echo "Error creating table: " . $conn->error . "<br>";
+}
 
 // Create songs table
 $sql = "CREATE TABLE IF NOT EXISTS songs (
@@ -34,6 +53,7 @@ $sql = "CREATE TABLE IF NOT EXISTS songs (
   cover VARCHAR(512) NOT NULL,
   audio VARCHAR(512) NOT NULL,
   genre VARCHAR(100) NOT NULL,
+  user_id INT NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
 

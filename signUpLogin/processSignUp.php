@@ -1,18 +1,12 @@
 <?php
-// Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "music";
+// Start session
+session_start();
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Include database connection configuration
+require_once __DIR__ . '/../includes/db_connect.php';
 
-// Check connection
-if ($conn->connect_error) {
-    echo "<script>alert('Connection failed: " . $conn->connect_error . "');</script>";
-    die("Connection failed: " . $conn->connect_error);
-}
+// Determine if this is an AJAX request
+$isAjax = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest');
 
 // Process form data
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -32,8 +26,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Valid email is required";
     }
     
-    if (empty($password) || strlen($password) < 6) {
-        $errors[] = "Password must be at least 6 characters long";
+    // Server-side password strength validation
+    if (empty($password)) {
+        $errors[] = "Password is required";
+    } else {
+        if (strlen($password) < 8) {
+            $errors[] = "Password must be at least 8 characters long";
+        }
+        if (!preg_match('/\d/', $password)) {
+            $errors[] = "Password must contain at least one number";
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = "Password must contain at least one uppercase letter";
+        }
+        if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+            $errors[] = "Password must contain at least one special character";
+        }
+    }
+    
+    // If there are validation errors, return early
+    if (!empty($errors)) {
+        $errorMessage = implode(", ", $errors);
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => $errorMessage]);
+        } else {
+            echo "<script>alert('Registration Error: " . $errorMessage . "');</script>";
+            echo "<script>window.location.href = 'signup.html?error=" . urlencode($errorMessage) . "';</script>";
+        }
+        exit();
     }
     
     // Check if email already exists
@@ -44,15 +65,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     if ($result->num_rows > 0) {
         $errors[] = "Email already exists. Please use a different email or login.";
-    }
-    
-    // If there are errors, show alert and redirect back with error messages
-    if (!empty($errors)) {
         $errorMessage = implode(", ", $errors);
-        echo "<script>alert('Registration Error: " . $errorMessage . "');</script>";
-        echo "<script>setTimeout(function() { window.location.href = 'signup.html?error=" . urlencode($errorMessage) . "'; }, 1000);</script>";
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => $errorMessage]);
+        } else {
+            echo "<script>alert('Registration Error: " . $errorMessage . "');</script>";
+            echo "<script>window.location.href = 'signup.html?error=" . urlencode($errorMessage) . "';</script>";
+        }
+        $stmt->close();
+        $conn->close();
         exit();
     }
+    $stmt->close();
     
     // Hash the password
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -62,17 +87,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("sss", $name, $email, $hashed_password);
     
     if ($stmt->execute()) {
-        // Show success alert and redirect to login page
-        echo "<script>alert('Registration successful! You will now be redirected to the login page.');</script>";
-        echo "<script>setTimeout(function() { window.location.href = 'login.html?signup=success'; }, 1000);</script>";
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Registration successful! Redirecting to login...', 
+                'redirect' => 'login.html?signup=success'
+            ]);
+        } else {
+            echo "<script>alert('Registration successful! Redirecting to login page...');</script>";
+            echo "<script>window.location.href = 'login.html?signup=success';</script>";
+        }
     } else {
-        // Show error alert and redirect back to signup page
-        echo "<script>alert('Registration failed: " . $conn->error . "');</script>";
-        echo "<script>setTimeout(function() { window.location.href = 'signup.html?error=Registration failed: " . urlencode($conn->error) . "'; }, 1000);</script>";
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Registration failed: ' . $conn->error]);
+        } else {
+            echo "<script>alert('Registration failed: " . $conn->error . "');</script>";
+            echo "<script>window.location.href = 'signup.html?error=Registration failed';</script>";
+        }
     }
     
     $stmt->close();
     $conn->close();
+    exit();
+} else {
+    // Redirect on direct access
+    header('Location: signup.html');
     exit();
 }
 ?>

@@ -1,46 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <title>Login Page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - MusicWave</title>
+  <link rel="stylesheet" href="style.css?v=3.0">
 </head>
-
-<!-- Add this right after the <body> tag and before the container div -->
 <body>
-    
-    
-    <div class="container" id="container">
-        <div class="form-container sign-in">
-            <form action="processLogin.php" method="POST">
-                <h1>Log In</h1>
-                <div class="social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-                <span>or use your email password</span>
-                <input type="email" name="email" placeholder="Email">
-                <input type="password" name="password" placeholder="Password">
-                <a href="#">Forget Your Password?</a>
-                <button>Log In</button>
-                <p class="redirect-text">Don't have an account? <a href="signup.html">Sign Up</a></p>
-            </form>
-        </div>
-        <div class="toggle-container">
-            <div class="toggle">
-                <div class="toggle-panel toggle-right">
-                    <h1>Welcome Back!</h1>
-                    <p>Enter your personal details to use all of site features</p>
-                    <a href="signup.html"><button class="hidden">Sign Up</button></a>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
+  <!-- Toast Container for beautiful dynamic alerts -->
+  <div class="toast-container" id="toastContainer"></div>
 
+  <div class="auth-container">
+    <!-- Header -->
+    <div class="auth-header">
+      <div class="logo-wrapper">
+        <div class="logo-bar"></div>
+        <div class="logo-bar"></div>
+        <div class="logo-bar"></div>
+        <div class="logo-bar"></div>
+        <div class="logo-bar"></div>
+        <span class="logo-text">MusicWave</span>
+      </div>
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-subtitle">Sign in to your MusicWave account</p>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" novalidate>
+      <!-- Email Field -->
+      <div class="form-group">
+        <div class="input-wrapper">
+          <input type="email" id="email" name="email" class="form-input" placeholder=" " required autocomplete="email">
+          <label for="email" class="form-label">Email address</label>
+          <div class="input-status-icon" id="emailStatusIcon"></div>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <div class="input-wrapper">
+          <input type="password" id="password" name="password" class="form-input" placeholder=" " required autocomplete="current-password">
+          <label for="password" class="form-label">Password</label>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+          <a href="#" class="forgot-password" onclick="showToast('info', 'Password recovery coming soon!')">Forgot password?</a>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <span id="btnText">Continue</span>
+        <div class="spinner" id="btnSpinner"></div>
+      </button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <!-- Social Sign In (Aesthetics & Click Feedbacks) -->
+    <div class="social-buttons">
+      <button class="btn-social" onclick="showToast('info', 'Google Sign-In coming soon!')">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+      <button class="btn-social" onclick="showToast('info', 'GitHub Sign-In coming soon!')">
+        <svg viewBox="0 0 24 24" fill="currentColor" style="color: #fff;">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.479C19.138 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+        </svg>
+        Continue with GitHub
+      </button>
+    </div>
+
+    <!-- Redirect Link -->
+    <div class="redirect-wrapper">
+      Don't have an account? <a href="signup.html" class="redirect-link">Sign Up</a>
+    </div>
+  </div>
+
+  <script>
+    // Toast system helper
+    function showToast(type, message) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      const icon = document.createElement('div');
+      icon.className = 'toast-icon';
+      icon.innerHTML = type === 'success' ? '✓' : (type === 'error' ? '✕' : 'ℹ');
+      
+      const text = document.createElement('div');
+      text.className = 'toast-message';
+      text.textContent = message;
+      
+      toast.appendChild(icon);
+      toast.appendChild(text);
+      container.appendChild(toast);
+      
+      // Trigger animation
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      // Auto dismiss after 4 seconds (matching CSS timer)
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+      }, 4000);
+    }
+
+    // Real-time Email Format Checking
+    const emailInput = document.getElementById('email');
+    const emailStatus = document.getElementById('emailStatusIcon');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    emailInput.addEventListener('input', () => {
+      const val = emailInput.value.trim();
+      if (val === '') {
+        emailStatus.innerHTML = '';
+        emailStatus.className = 'input-status-icon';
+      } else if (emailRegex.test(val)) {
+        emailStatus.innerHTML = '✓';
+        emailStatus.className = 'input-status-icon valid';
+      } else {
+        emailStatus.innerHTML = '✕';
+        emailStatus.className = 'input-status-icon invalid';
+      }
+    });
+
+    // Check for URL parameters (e.g. signup=success or errors)
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('signup') && params.get('signup') === 'success') {
+        showToast('success', 'Account created successfully! Please sign in.');
+      }
+      if (params.has('error')) {
+        showToast('error', decodeURIComponent(params.get('error')));
+      }
+    });
+
+    // Form submission via AJAX (fetch)
+    const loginForm = document.getElementById('loginForm');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = emailInput.value.trim();
+      const password = document.getElementById('password').value;
+
+      // Validation
+      if (!email) {
+        showToast('error', 'Please enter your email address.');
+        emailInput.focus();
+        return;
+      }
+      if (!emailRegex.test(email)) {
+        showToast('error', 'Please enter a valid email address.');
+        emailInput.focus();
+        return;
+      }
+      if (!password) {
+        showToast('error', 'Please enter your password.');
+        document.getElementById('password').focus();
+        return;
+      }
+
+      // Enter loading state
+      btnSubmit.disabled = true;
+      btnText.style.opacity = '0';
+      btnSpinner.style.display = 'block';
+
+      try {
+        const formData = new FormData();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        const response = await fetch('processLogin.php', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not OK');
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          showToast('success', result.message || 'Login successful!');
+          // Redirect on success
+          setTimeout(() => {
+            window.location.href = result.redirect || '../index.php';
+          }, 1200);
+        } else {
+          showToast('error', result.message || 'Invalid email or password.');
+          // Exit loading state
+          btnSubmit.disabled = false;
+          btnText.style.opacity = '1';
+          btnSpinner.style.display = 'none';
+        }
+      } catch (err) {
+        showToast('error', 'A server error occurred. Please try again.');
+        // Exit loading state
+        btnSubmit.disabled = false;
+        btnText.style.opacity = '1';
+        btnSpinner.style.display = 'none';
+      }
+    });
+  </script>
+</body>
 </html>

@@ -1,0 +1,6 @@
+.git
+.gitignore
+.vercel
+node_modules
+*.sql
+*.md
